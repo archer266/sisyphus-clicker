@@ -1,4 +1,5 @@
 export const PUSHES_PER_CLIMB = 100;
+// Keep the original storage key so the name correction preserves existing saves.
 export const SAVE_KEY = 'sysyphus-clicker-v1';
 export function newState() { return { totalPushes: 0n, climbPushes: 0, completedClimbs: 0n, isResetting: false }; }
 export function loadState(storage) {
