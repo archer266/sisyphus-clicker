@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#101719" />
+    <meta name="description" content="One man. One boulder. An eternity of trying. An atmospheric pixel-art clicker." />
+    <title>Sysyphus Clicker — The eternal ascent</title>
+  </head>
+  <body>
+    <main id="game" aria-label="Sysyphus Clicker">
+      <canvas id="scene" aria-label="Sisyphus pushing a boulder up a moonlit mountain"></canvas>
+      <div class="vignette"></div>
+      <header><a class="wordmark" href="./" aria-label="Sysyphus Clicker home"><span class="brand-icon">◈</span> SYSYPHUS <span>CLICKER</span></a><div class="edition"><span></span> THE ETERNAL ASCENT</div></header>
+      <section class="hud" aria-label="Game statistics">
+        <div class="eyebrow">TOTAL PUSHES</div>
+        <div id="total" class="total">0</div>
+        <div class="stats"><div><div class="eyebrow">CURRENT CLIMB</div><div class="stat-value"><span id="progress">0</span><span class="unit">%</span></div><div class="progress-track"><div id="progress-bar"></div></div></div><div><div class="eyebrow">CLIMBS COMPLETED</div><div id="climbs" class="stat-value">0</div><div class="infinity-note">AND COUNTING</div></div></div>
+      </section>
+      <div class="summit-label"><span>↑</span> THE SUMMIT <small>NOT THE END.</small></div>
+      <footer>
+        <div class="quote">“One must imagine<br><em>Sisyphus happy.</em>”<span>— ALBERT CAMUS</span></div>
+        <div class="controls"><div id="status" role="status">A little higher. Again.</div><button id="push" type="button"><span class="push-arrow">↗</span><span>PUSH</span><span class="key-hint">SPACE</span></button><div class="instruction">CLICK ANYWHERE <span>·</span> TAP <span>·</span> PRESS SPACE</div></div>
+        <div class="eternity"><span>∞</span> THERE IS NO FINISH LINE.<small id="save-status">PROGRESS SAVED AUTOMATICALLY</small></div>
+      </footer>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
