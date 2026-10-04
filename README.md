@@ -21,16 +21,18 @@ npm run preview # Serve the production build
 
 ## Play
 
-Click or tap the scene, press PUSH, or press Space. Each deliberate press advances the current climb and the lifetime count. At 100 pushes the game pauses briefly, rolls the boulder downhill, and brings Sisyphus back. Input is disabled during the return. There is no final climb.
+Click or tap the scene, press PUSH, or press Space. Each deliberate press adds an uphill impulse and increases the lifetime count. Keep clicking to overcome gravity: slow clicks lose ground, normal clicks climb steadily, and rapid clicks climb faster. When you stop, momentum briefly carries the boulder onward before it rolls back. Sisyphus follows the rock, and neither can slide below the hill's starting point. At 100% physical hill progress the game pauses briefly, rolls the boulder downhill, and brings Sisyphus back. Input is disabled during the return. There is no final climb.
 
-Lifetime pushes, completed climbs, and current progress save after every action in localStorage. A refresh at the summit resumes the return sequence. Browser storage is local to the browser and site address; clearing it removes progress. The game still works if storage is unavailable. Counters use BigInt to remain exact beyond JavaScript's safe integer range.
+Lifetime pushes, completed climbs, and current progress save after every action, once per second during movement, and when leaving the page in localStorage. Original saves remain compatible. A refresh restores the current position at rest; a refresh at the summit resumes the return sequence. There is no offline rollback. Browser storage is local to the browser and site address; clearing it removes progress. The game still works if storage is unavailable. Counters use BigInt to remain exact beyond JavaScript's safe integer range.
 
 ## Architecture
 
 - `src/state.js`: state transitions, persistence, and balancing. Change **PUSHES_PER_CLIMB** at the top of this file (use a positive integer).
+- `src/physics.js`: tuning constants for click force, gravity, drag, speed limits, and rollback delay. Position and speed use hill-progress units and seconds. Movement uses small time steps and caps elapsed time at 50 ms per frame to avoid jumps after stalls.
 - `src/main.js`: pointer/keyboard input, HUD, and the timed summit/return cycle.
 - `src/scene.js`: responsive low-resolution canvas; mountain, ruins, stars, animated character, rotating boulder, and dust.
 - `src/style.css`: responsive overlay and controls. Google Fonts are optional; local fallbacks work offline.
 - `test/state.test.js`: repeated cycles, summit input lock, save recovery, large counters, and unavailable storage.
+- `test/physics.test.js`: clicking rates, inertia, rollback, bottom/summit limits, frame-rate independence, stalls, and save compatibility.
 
 Animation uses requestAnimationFrame with elapsed-time movement. The canvas adapts to the viewport, and the reduced-motion preference disables screen shake and ambient movement. The PUSH button supports keyboard focus and native activation.

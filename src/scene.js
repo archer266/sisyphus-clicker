@@ -80,9 +80,10 @@ export class GameScene {
       this.position+=(1-this.position)*(1-Math.exp(-dt*18));
       rockProgress=reset<.5?this.position:1-Math.pow(clamp((reset-.5)/1.45),.75);
       personProgress=reset<.85?this.position:1-clamp((reset-.85)/1.9);
-    } else {this.position+=(this.state.climbPushes/PUSHES_PER_CLIMB-this.position)*(1-Math.exp(-dt*16));rockProgress=personProgress=this.position;}
+    } else {this.position=this.state.climbPushes/PUSHES_PER_CLIMB;rockProgress=personProgress=this.position;}
     const rock=this.point(rockProgress),person=this.point(personProgress);
-    this.character(person.x,person.y,impulse,t,reset!==null && reset>.65,reset!==null && reset<.5);
+    const moving=reset===null && Math.abs(this.state.boulderVelocity)>.08;
+    this.character(person.x,person.y,impulse,t,(reset!==null && reset>.65)||moving,reset!==null && reset<.5);
     this.boulder(rock.x,rock.y,rockProgress*9+(reset!==null&&reset>.5?(reset-.5)*12:0),s);
     for(const p of this.dust){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=22*dt;p.life-=dt;c.globalAlpha=clamp(p.life*1.4);this.rect(p.x,p.y,2*s,2*s,'#bda273');}this.dust=this.dust.filter(p=>p.life>0);c.globalAlpha=1;
     for(let i=0;i<16;i++){const x=(i*67.7+(this.reduced?0:t*3))%w,y=h*.60+Math.sin(i*12+(this.reduced?0:t*.2))*h*.22;c.globalAlpha=.12+Math.sin(i+t)*.1;this.rect(x,y,1,1,'#e3ba72');}c.globalAlpha=1;
