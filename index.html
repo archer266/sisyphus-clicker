@@ -11,19 +11,52 @@
     <main id="game" aria-label="Sisyphus Clicker">
       <canvas id="scene" aria-label="Sisyphus pushing a boulder up a moonlit mountain"></canvas>
       <div class="vignette"></div>
-      <header><a class="wordmark" href="./" aria-label="Sisyphus Clicker home"><span class="brand-icon">◈</span> SISYPHUS <span>CLICKER</span></a><div class="edition"><span></span> THE ETERNAL ASCENT</div></header>
+      <header><a class="wordmark" href="./" aria-label="Sisyphus Clicker home"><span class="brand-icon">◈</span> SISYPHUS <span>CLICKER</span></a><nav class="toolbar" aria-label="Game controls"><button id="pause" type="button">PAUSE</button><button id="settings" type="button">SETTINGS</button><button id="fullscreen" type="button" aria-label="Toggle fullscreen (F11)">FULLSCREEN</button></nav></header>
       <section class="hud" aria-label="Game statistics">
         <div class="eyebrow">TOTAL PUSHES</div>
         <div id="total" class="total">0</div>
         <div class="stats"><div><div class="eyebrow">CURRENT CLIMB</div><div class="stat-value"><span id="progress">0</span><span class="unit">%</span></div><div class="progress-track"><div id="progress-bar"></div></div></div><div><div class="eyebrow">CLIMBS COMPLETED</div><div id="climbs" class="stat-value">0</div><div class="infinity-note">AND COUNTING</div></div></div>
-      </section>
+      <div class="motion-feedback"><span id="motion" role="status">HOLDING GROUND</span><div class="speed-track"><div id="speed-bar"></div></div></div></section>
       <div class="summit-label"><span>↑</span> THE SUMMIT <small>NOT THE END.</small></div>
       <footer>
         <div class="quote">“One must imagine<br><em>Sisyphus happy.</em>”<span>— ALBERT CAMUS</span></div>
-        <div class="controls"><div id="status" role="status">A little higher. Again.</div><button id="push" type="button"><span class="push-arrow">↗</span><span>PUSH</span><span class="key-hint">SPACE</span></button><div class="instruction">CLICK ANYWHERE <span>·</span> TAP <span>·</span> PRESS SPACE</div></div>
+        <div class="controls"><div id="status" role="status">A little higher. Again.</div><button id="push" type="button"><span class="push-arrow">↗</span><span>PUSH</span><span class="key-hint">SPACE</span></button><div class="instruction">CLICK / SPACE TO PUSH <span>·</span> P TO PAUSE</div></div>
         <div class="eternity"><span>∞</span> THERE IS NO FINISH LINE.<small id="save-status">PROGRESS SAVED AUTOMATICALLY</small></div>
       </footer>
     </main>
+    <dialog id="pause-dialog" aria-labelledby="pause-title">
+      <div class="dialog-kicker">SISYPHUS CLICKER</div>
+      <h1 id="pause-title">The eternal ascent</h1>
+      <p id="pause-reason">Reach the summit. Begin again. Every push counts.</p>
+      <p>Rapid clicks brake a downhill roll, then push the boulder back uphill. Keep a steady rhythm to overcome its weight.</p>
+      <p class="dialog-hint">Click the hill or press Space to push. P / Esc pauses. F11 toggles fullscreen. Leaving this window pauses the game.</p>
+      <button class="primary" id="resume" type="button">BEGIN ASCENT</button>
+      <button id="pause-settings" type="button">SETTINGS &amp; SAVES</button>
+    </dialog>
+    <dialog id="settings-dialog" aria-labelledby="settings-title">
+      <div class="dialog-kicker">TAKE A BREATH</div><h2 id="settings-title">Settings</h2>
+      <label class="setting-row"><span>Mute sound</span><input id="mute" type="checkbox"></label>
+      <label class="setting-row"><span>Volume</span><input id="volume" type="range" min="0" max="100" value="35"></label>
+      <label class="setting-row"><span>Reduce motion &amp; effects</span><input id="reduced-motion" type="checkbox"></label>
+      <div class="save-actions"><button id="export" type="button">EXPORT SAVE</button><button id="import" type="button">IMPORT SAVE</button></div>
+      <input id="import-file" type="file" accept=".json,application/json" hidden>
+      <p class="dialog-hint">Export from the browser game and import here to carry your progress into the desktop game.</p>
+      <p id="backup-status" class="dialog-hint" role="status"></p>
+      <button id="restart" class="danger" type="button">RESTART ALL PROGRESS</button>
+      <button id="settings-close" class="primary" type="button">BACK</button>
+    </dialog>
+    <dialog id="restart-dialog" aria-labelledby="restart-title">
+      <h2 id="restart-title">Begin from zero?</h2>
+      <p>This deletes your total pushes, completed climbs and current hill progress. Your sound settings stay.</p>
+      <button id="restart-cancel" class="primary" type="button">KEEP MY PROGRESS</button>
+      <button id="restart-confirm" class="danger" type="button">DELETE PROGRESS &amp; RESTART</button>
+    </dialog>
+    <dialog id="import-dialog" aria-labelledby="import-title">
+      <h2 id="import-title">Replace your current save?</h2>
+      <p>Importing replaces your current pushes and climbs. Export your current save first if you want to keep it.</p>
+      <button id="import-cancel" class="primary" type="button">CANCEL</button>
+      <button id="import-confirm" type="button">REPLACE &amp; IMPORT</button>
+    </dialog>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { newState, pushState, finishClimb, PUSHES_PER_CLIMB, loadState, SAVE_KEY } from '../src/state.js';
 import { advanceBoulder, MAX_UPHILL_SPEED, MAX_DOWNHILL_SPEED } from '../src/physics.js';
+import { GameSession } from '../src/session.js';
 
 function simulate(seconds, rate = 0, fps = 60, state = { ...newState(), climbPushes: 20 }) {
   let nextClick = 0;
@@ -14,12 +15,12 @@ function simulate(seconds, rate = 0, fps = 60, state = { ...newState(), climbPus
 }
 
 test('idle rolls downhill gradually, accelerates, and preserves clicks', () => {
-  const state = { ...newState(), climbPushes: 20 };
+  const state = { ...newState(), climbPushes: 80 };
   advanceBoulder(state,.05,PUSHES_PER_CLIMB);
   assert.ok(state.boulderVelocity < 0 && state.boulderVelocity > -.2);
   const initialSpeed = state.boulderVelocity;
   simulate(5,0,60,state);
-  assert.ok(state.climbPushes < 16 && state.boulderVelocity < initialSpeed);
+  assert.ok(state.climbPushes < 76 && state.boulderVelocity < initialSpeed);
   assert.ok(state.boulderVelocity >= -MAX_DOWNHILL_SPEED);
   assert.equal(state.totalPushes,0n);
 });
@@ -41,8 +42,20 @@ test('stopping coasts uphill before reversing; resuming must counter momentum', 
   assert.ok(state.boulderVelocity < 0);
   const downhill=state.boulderVelocity;
   pushState(state);
-  assert.ok(state.boulderVelocity > 0 && state.boulderVelocity < 4);
+  assert.ok(state.boulderVelocity > downhill && state.boulderVelocity < 0);
   assert.ok(downhill < 0);
+});
+
+test('2–3 seconds of rollback needs several clicks to brake before reversing', () => {
+  const state=simulate(2.75,0,60,{...newState(),climbPushes:80});
+  assert.ok(state.boulderVelocity < -6);
+  const speed=state.boulderVelocity;pushState(state);
+  assert.ok(state.boulderVelocity > speed && state.boulderVelocity < 0);
+  let clicks=1;
+  while(state.boulderVelocity<0 && clicks<10){pushState(state);clicks++;}
+  assert.ok(clicks>=3 && clicks<=5,`braking took ${clicks} clicks`);
+  assert.ok(state.boulderVelocity >= 0);
+  const stopped=state.boulderVelocity;pushState(state);assert.ok(state.boulderVelocity>stopped);
 });
 
 test('bottom clamps position and momentum and permits pushing again', () => {
@@ -63,7 +76,11 @@ test('summit is reached by motion, locks input, then resets all physics', () => 
 });
 
 test('30, 60 and 144 FPS agree and a lag spike cannot teleport the boulder', () => {
-  const positions=[30,60,144].map(fps=>simulate(10,2,fps).climbPushes);
+  const positions=[30,60,144].map(fps=>{
+    const game=new GameSession({...newState(),climbPushes:20});game.resume();
+    for(let frame=0;frame<10*fps;frame++){if(frame%(fps/2)===0)game.push();game.tick(1/fps);}
+    return game.state.climbPushes;
+  });
   assert.ok(Math.max(...positions)-Math.min(...positions)<.01,positions.join(', '));
   const state={...newState(),climbPushes:20,boulderVelocity:12};
   advanceBoulder(state,30,PUSHES_PER_CLIMB);

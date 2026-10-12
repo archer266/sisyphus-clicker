@@ -1,10 +1,10 @@
 // Distances are hill-progress units (100 units per hill); time is in seconds.
-export const CLICK_FORCE = 4;
-export const DOWNHILL_GRAVITY = 3;
-export const FRICTION = 3; // Exponential drag per second, not a per-frame multiplier.
+export const CLICK_FORCE = 2;
+export const DOWNHILL_GRAVITY = 4;
+export const FRICTION = 0.35; // Exponential drag per second, not a per-frame multiplier.
 export const MAX_UPHILL_SPEED = 12;
-export const MAX_DOWNHILL_SPEED = 1.5;
-export const ROLLBACK_DELAY = 0.3; // Gravity builds up after the most recent push.
+export const MAX_DOWNHILL_SPEED = 8;
+export const ROLLBACK_DELAY = 0.35; // Gravity builds up after the most recent push.
 export const MAX_FRAME_DELTA = 0.05; // Discard long pauses instead of catching up.
 const STEP = 1 / 240;
 

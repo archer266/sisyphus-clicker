@@ -1,0 +1,24 @@
+{
+  "appId": "com.archer266.sisyphus-clicker",
+  "productName": "Sisyphus Clicker",
+  "electronDist": "node_modules/electron/dist",
+  "directories": { "output": "release", "buildResources": "build" },
+  "files": ["dist/**/*", "desktop/**/*", "build/icon.ico", "package.json", "src/assets/*LICENSE.txt"],
+  "asar": true,
+  "win": {
+    "icon": "build/icon.ico",
+    "target": [{ "target": "nsis", "arch": ["x64"] }, { "target": "portable", "arch": ["x64"] }],
+    "signAndEditExecutable": true,
+    "signExecutable": false
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "deleteAppDataOnUninstall": false,
+    "artifactName": "Sisyphus-Clicker-Setup-${version}.${ext}"
+  },
+  "portable": { "artifactName": "Sisyphus-Clicker-Portable-${version}.${ext}" }
+}

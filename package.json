@@ -1,8 +1,27 @@
 {
   "name": "sisyphus-clicker",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "description": "An atmospheric pixel-art game about an eternal ascent and a very heavy boulder.",
+  "author": "archer266",
+  "main": "desktop/main.cjs",
   "private": true,
   "type": "module",
-  "scripts": { "dev": "vite --host 0.0.0.0", "build": "vite build", "preview": "vite preview --host 0.0.0.0", "test": "node --test" },
-  "devDependencies": { "vite": "^7.1.0" }
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test test/*.test.js",
+    "test:desktop": "node scripts/desktop-smoke.mjs",
+    "test:portable": "node scripts/portable-smoke.mjs",
+    "icon": "node scripts/generate-icon.mjs",
+    "desktop": "npm run build && electron .",
+    "package:win": "npm run icon && npm run build && electron-builder --win nsis portable --x64 --publish never",
+    "package:dir": "npm run icon && npm run build && electron-builder --win --x64 --dir --publish never"
+  },
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3",
+    "playwright": "^1.64.0",
+    "vite": "^7.1.0"
+  }
 }

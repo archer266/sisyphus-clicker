@@ -7,7 +7,8 @@ export class GameScene {
   constructor(canvas, state) {
     this.canvas = canvas; this.ctx = canvas.getContext('2d'); this.state = state;
     this.position = state.climbPushes / PUSHES_PER_CLIMB;
-    this.lastPush = -1000; this.lastFrame = 0; this.dust = [];
+    this.lastPush = -1000; this.lastFrame = null; this.dust = [];
+    this.angle = 0; this.lastRockProgress = this.position; this.gait = 0; this.rollDust = 0;
     this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const rand = random(74);
     this.stars = Array.from({length:100}, () => [rand(),rand()*.72,rand()]);
@@ -25,19 +26,20 @@ export class GameScene {
     this.ctx.imageSmoothingEnabled = false;
   }
   point(progress) { return {x:this.start.x + (this.end.x-this.start.x)*progress, y:this.start.y+(this.end.y-this.start.y)*progress}; }
-  push() {
-    this.lastPush = performance.now();
+  push(time) {
+    this.lastPush = time;
     const p = this.point(this.position);
     for (let i=0;i<7;i++) this.dust.push({x:p.x-27*this.scale,y:p.y+7*this.scale,vx:-8-Math.random()*25,vy:-8-Math.random()*18,life:.4+Math.random()*.5});
+    if(this.dust.length>180)this.dust=this.dust.slice(-180);
   }
-  finishReset() { this.position = 0; }
+  finishReset() { this.position = 0; this.lastRockProgress = 0; this.angle = 0; this.dust = []; this.gait = 0; this.lastPush = -1000; }
   poly(points, color) {
     const c=this.ctx; c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(Math.round(x),Math.round(y)):c.moveTo(Math.round(x),Math.round(y)));c.closePath();c.fill();
   }
   rect(x,y,w,h,color) { this.ctx.fillStyle=color;this.ctx.fillRect(Math.round(x),Math.round(y),Math.ceil(w),Math.ceil(h)); }
   draw(time, reset) {
     const c=this.ctx,w=this.w,h=this.h,s=this.scale,t=time/1000;
-    const dt=Math.min(.05,(time-this.lastFrame)/1000 || .016);this.lastFrame=time;
+    const dt=this.lastFrame===null?0:Math.max(0,Math.min(.05,(time-this.lastFrame)/1000));this.lastFrame=time;
     const impulse=this.reduced?0:Math.max(0,1-(time-this.lastPush)/230);
     c.save();c.clearRect(0,0,w,h);
     if(impulse)c.translate(Math.round(Math.sin(time*.09)*impulse),Math.round(impulse*.6));
@@ -82,9 +84,19 @@ export class GameScene {
       personProgress=reset<.85?this.position:1-clamp((reset-.85)/1.9);
     } else {this.position=this.state.climbPushes/PUSHES_PER_CLIMB;rockProgress=personProgress=this.position;}
     const rock=this.point(rockProgress),person=this.point(personProgress);
+    const distance=(rockProgress-this.lastRockProgress)*Math.hypot(this.end.x-this.start.x,this.end.y-this.start.y);
+    this.angle+=distance/(31*s);this.lastRockProgress=rockProgress;
+    this.gait+=distance/(5*s);
+    const speed=reset===null?Math.abs(this.state.boulderVelocity):0;
+    if(!this.reduced && dt>0 && speed>.2){
+      this.rollDust+=dt*speed*1.5;
+      while(this.rollDust>=1){
+        this.rollDust--;this.dust.push({x:rock.x+5*s,y:rock.y-3*s,vx:-this.state.boulderVelocity*2,vy:-5-Math.random()*5,life:.25});
+      }
+    }
     const moving=reset===null && Math.abs(this.state.boulderVelocity)>.08;
     this.character(person.x,person.y,impulse,t,(reset!==null && reset>.65)||moving,reset!==null && reset<.5);
-    this.boulder(rock.x,rock.y,rockProgress*9+(reset!==null&&reset>.5?(reset-.5)*12:0),s);
+    this.boulder(rock.x,rock.y,this.angle,s);
     for(const p of this.dust){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=22*dt;p.life-=dt;c.globalAlpha=clamp(p.life*1.4);this.rect(p.x,p.y,2*s,2*s,'#bda273');}this.dust=this.dust.filter(p=>p.life>0);c.globalAlpha=1;
     for(let i=0;i<16;i++){const x=(i*67.7+(this.reduced?0:t*3))%w,y=h*.60+Math.sin(i*12+(this.reduced?0:t*.2))*h*.22;c.globalAlpha=.12+Math.sin(i+t)*.1;this.rect(x,y,1,1,'#e3ba72');}c.globalAlpha=1;
     // Foreground shale and grass frame the lower edge.
@@ -111,8 +123,8 @@ export class GameScene {
   }
   character(x,y,push,t,walking,upright){
     const c=this.ctx,s=this.scale;c.save();c.translate(Math.round(x-28*s),Math.round(y+11*s));c.scale(s,s);
-    const gait=walking&&!this.reduced?Math.sin(t*15)*4:push*3;
-    const lean=upright?-3:push*2;
+    const gait=walking&&!this.reduced?Math.sin(this.gait)*4:push*3;
+    const lean=upright?-3:push*2+(this.state.boulderVelocity<-.2?-1:0);
     const skin='#bd9571',light='#dbb48a',shadow='#8a7058';
     const limb=(pts,color,width)=>{c.strokeStyle=color;c.lineWidth=width;c.lineJoin='miter';c.lineCap='square';c.beginPath();pts.forEach(([xx,yy],i)=>i?c.lineTo(Math.round(xx),Math.round(yy)):c.moveTo(Math.round(xx),Math.round(yy)));c.stroke();};
     limb([[-4,-13],[-10-gait,-5],[-13-gait,0]],shadow,4);limb([[1,-13],[5+gait,-8],[3+gait,-1]],skin,4);
