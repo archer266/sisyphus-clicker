@@ -1,0 +1,59 @@
+name: Windows release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Check tag matches package version
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($env:GITHUB_REF_NAME -ne "v$version") { throw 'Release tag must match package.json' }
+      - name: Install dependencies
+        run: npm ci
+      - name: Ensure Electron runtime is installed
+        run: node node_modules/electron/install.js
+      - name: Test physics, progression and saves
+        run: npm test
+      - name: Build Windows installer and portable game
+        run: npm run package:win
+      - name: Test packaged desktop game offline
+        run: npm run test:desktop
+      - name: Test portable launch and save recovery offline
+        run: npm run test:portable
+      - name: Generate download checksums
+        run: |
+          $lines = Get-ChildItem release/Sisyphus-Clicker-*.exe | Sort-Object Name | ForEach-Object {
+            $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)"
+          }
+          $lines | Set-Content release/SHA256SUMS.txt -Encoding ascii
+      - name: Publish GitHub release with Windows downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          gh release create $env:GITHUB_REF_NAME "release/Sisyphus-Clicker-Setup-$version.exe" "release/Sisyphus-Clicker-Portable-$version.exe" release/SHA256SUMS.txt --verify-tag --latest --title "Sisyphus Clicker $env:GITHUB_REF_NAME - Windows Desktop" --notes-file .github/RELEASE_NOTES.md
