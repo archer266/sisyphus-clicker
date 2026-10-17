@@ -2,6 +2,12 @@
 
 An atmospheric pixel-art game about an endless task. Push a giant boulder up a moonlit mountain, reach the summit, watch the stone return, and begin again. The original canvas graphics and lifetime counters remain intact.
 
+## UI Preview
+
+Source-generated UI preview of the main interface at the start of an ascent, with dialogs closed. Rendered from the existing layout, styles, bundled fonts, and canvas drawing code; this is not an actual application screenshot.
+
+![Source-generated UI preview of Sisyphus Clicker](docs/screenshots/main-interface.png)
+
 ## Play the Windows desktop game
 
 Windows 10/11, x64. No Node.js, VS Code, terminal, server or internet connection is needed to play.
